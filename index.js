@@ -45,25 +45,38 @@ const PORT = process.env.PORT;
 const server = createServer((req, res) => {
     
     switch (req.method){
+    
         case "GET":
+            
+            if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+
+                const postId = req.url.split('/').pop();
+                const user = posts.find(post => post.id == Number(postId));
+
+                if(user){
+                    res.statusCode = 200;
+                    res.setHeader("Content-type", "application/json");
+                    res.write(JSON.stringify(user));
+                    res.end();
+                    return;
+                }else{
+                    res.statusCode = 404;
+                    res.write(JSON.stringify({message : "Ressource Not Found"}));
+                    res.end();
+                    return;
+                }
+            }
+
             if(req.url !== "/api/posts"){
                 res.statusCode = 404;
                 res.write(JSON.stringify({message : "Ressource Not Found"}));
-            }
-
-            if(req.url.match(/\/api\/posts\/([0-9]+)/)){
-                const postId = req.url.split('/')[3];
-                console.log(postId)
-                const user = posts.find(post => post.id == Number(postId));
-                res.setHeader("Content-type", "application/json");
-                res.write(JSON.stringify(user));
-                res.end()
+                res.end();
+                return;
             }
             
             res.setHeader("Content-type", "application/json");
             res.write(JSON.stringify(posts));
             res.end()
-            
 
             break;
     }
