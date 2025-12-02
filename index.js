@@ -47,7 +47,8 @@ const server = createServer((req, res) => {
     switch (req.method){
     
         case "GET":
-            
+          
+          res.setHeader("Content-type", "application/json");
             if(req.url.match(/\/api\/posts\/([0-9]+)/)){
 
                 const postId = req.url.split('/').pop();
@@ -55,7 +56,6 @@ const server = createServer((req, res) => {
 
                 if(user){
                     res.statusCode = 200;
-                    res.setHeader("Content-type", "application/json");
                     res.write(JSON.stringify(user));
                     res.end();
                     return;
@@ -74,11 +74,11 @@ const server = createServer((req, res) => {
                 return;
             }
             
-            res.setHeader("Content-type", "application/json");
             res.write(JSON.stringify(posts));
             res.end()
 
             break;
+            
     }
     // if(req.url === "/"){
     //     res.writeHead(200, {"content-type" : "application/json"});
