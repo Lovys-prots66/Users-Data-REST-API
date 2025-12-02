@@ -49,36 +49,54 @@ const server = createServer((req, res) => {
         case "GET":
           
           res.setHeader("Content-type", "application/json");
-            if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
 
-                const postId = req.url.split('/').pop();
-                const user = posts.find(post => post.id == Number(postId));
+              const postId = req.url.split('/').pop();
+              const user = posts.find(post => post.id == Number(postId));
 
-                if(user){
-                    res.statusCode = 200;
-                    res.write(JSON.stringify(user));
-                    res.end();
-                    return;
-                }else{
-                    res.statusCode = 404;
-                    res.write(JSON.stringify({message : "Ressource Not Found"}));
-                    res.end();
-                    return;
-                }
-            }
+              if(user){
+                  res.statusCode = 200;
+                  res.write(JSON.stringify(user));
+                  res.end();
+                  return;
+              }else{
+                  res.statusCode = 404;
+                  res.write(JSON.stringify({message : "Ressource Not Found"}));
+                  res.end();
+                  return;
+              }
+          }
 
-            if(req.url !== "/api/posts"){
-                res.statusCode = 404;
-                res.write(JSON.stringify({message : "Ressource Not Found"}));
-                res.end();
-                return;
-            }
-            
-            res.write(JSON.stringify(posts));
-            res.end()
+          if(req.url !== "/api/posts"){
+              res.statusCode = 404;
+              res.write(JSON.stringify({message : "Ressource Not Found"}));
+              res.end();
+              return;
+          }
+          
+          res.write(JSON.stringify(posts));
+          res.end()
 
-            break;
-            
+          break;
+
+        case "POST":
+
+          if(req.url == "/api/posts"){
+            let data = '';
+  
+            req.on('data', (chunk) => {
+              data += chunk;
+            });
+  
+            req.on('end', () => {
+              posts.push(JSON.parse(data));
+              res.statusCode = 201;
+              res.end();
+            })
+          }
+
+          break;
+
     }
     // if(req.url === "/"){
     //     res.writeHead(200, {"content-type" : "application/json"});
