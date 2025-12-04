@@ -96,6 +96,25 @@ const server = createServer((req, res) => {
           }
 
           break;
+        
+        case "PUT":
+          
+          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+            let id = req.url.split("/")[3];
+            let data = '';
+
+            req.on('data', chunk => {
+              data += chunk;
+            });
+
+            req.on('end', () => {
+              posts[id - 1] = JSON.parse(data);
+              res.statusCode = 201;
+              res.end(); 
+            });
+          }
+
+          break;
 
     }
     // if(req.url === "/"){
