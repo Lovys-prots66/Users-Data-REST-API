@@ -3,7 +3,7 @@ import { loadEnvFile } from "node:process"
 
 loadEnvFile();
 
-const posts = [
+let posts = [
   {
     id: 1,
     title: "The Rise of Modern JavaScript Frameworks",
@@ -38,8 +38,8 @@ const posts = [
 
 
 //import environment variables from .env
-const HOST = process.env.HOST;
-const PORT = process.env.PORT;
+const HOST = process.env.HOST || "localhost";
+const PORT = process.env.PORT || 3000;
 
 // create a server
 const server = createServer((req, res) => {
@@ -116,6 +116,19 @@ const server = createServer((req, res) => {
 
           break;
 
+        case "DELETE":
+
+          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+            let id = parseInt(req.url.split("/")[3]);
+
+            if(id){
+              posts = posts.filter(post => post.id !== id);
+              res.statusCode = 200;
+              res.end();
+            }
+          }
+
+          break;
     }
     // if(req.url === "/"){
     //     res.writeHead(200, {"content-type" : "application/json"});
