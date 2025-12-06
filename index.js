@@ -35,7 +35,20 @@ let posts = [
   }
 ];
 
+const NotFoundHandler = (req, res) => {
+  res.statusCode = 404;
+  res.setHeader("Content-type", "application/json");
+  res.write(JSON.stringify({"Message" : "Ressource not found"}));
+  res.end();
+}
 
+const SuccessHandler = () => {
+
+}
+
+const toJSON = (res, item) => {
+  res.write(JSON.stringify(item));
+}
 
 //import environment variables from .env
 const HOST = process.env.HOST || "localhost";
@@ -43,9 +56,12 @@ const PORT = process.env.PORT || 3000;
 
 // create a server
 const server = createServer((req, res) => {
-    
+  
+  const message = {};
+  
     switch (req.method){
-    
+      
+
         case "GET":
           
           res.setHeader("Content-type", "application/json");
@@ -60,18 +76,15 @@ const server = createServer((req, res) => {
                   res.end();
                   return;
               }else{
-                  res.statusCode = 404;
-                  res.write(JSON.stringify({message : "Ressource Not Found"}));
-                  res.end();
-                  return;
+                NotFoundHandler(req, res);
+                res.end();
+                return;
               }
           }
 
           if(req.url !== "/api/posts"){
-              res.statusCode = 404;
-              res.write(JSON.stringify({message : "Ressource Not Found"}));
-              res.end();
-              return;
+            NotFoundHandler(req, res);
+            return;
           }
           
           res.write(JSON.stringify(posts));
@@ -91,6 +104,7 @@ const server = createServer((req, res) => {
             req.on('end', () => {
               posts.push(JSON.parse(data));
               res.statusCode = 201;
+              toJSON(res, {"Message" : "Ressource added successfully"});
               res.end();
             })
           }
@@ -101,17 +115,24 @@ const server = createServer((req, res) => {
           
           if(req.url.match(/\/api\/posts\/([0-9]+)/)){
             let id = req.url.split("/")[3];
-            let data = '';
-
-            req.on('data', chunk => {
+            
+            if(id){
+              let data = '';
+              req.on('data', chunk => {
               data += chunk;
-            });
+              });
 
-            req.on('end', () => {
-              posts[id - 1] = JSON.parse(data);
-              res.statusCode = 201;
-              res.end(); 
-            });
+              req.on('end', () => {
+                posts[id - 1] = JSON.parse(data);
+                res.statusCode = 201;
+                res.writeHead();
+                res.end(); 
+              });
+              
+            }else{
+              NotFoundHandler(req, res);
+              res.end();
+            }
           }
 
           break;
