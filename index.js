@@ -1,7 +1,7 @@
 import { createServer } from "node:http"
 import { loadEnvFile } from "node:process"
 import mysql from "mysql2/promise";
-import { error } from "node:console";
+
 loadEnvFile();
 
 
@@ -46,14 +46,14 @@ const server = createServer( async (req, res) => {
           
           res.setHeader("Content-type", "application/json");
 
-          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+          if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
-              const postId = req.url.split('/').pop();
-              const [post] = await pool.query("SELECT * FROM posts WHERE id = ?", [postId]);
+              const userId = req.url.split('/').pop();
+              const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
 
-              if(post){
+              if(user){
                   res.statusCode = 200;
-                  res.write(JSON.stringify(post));
+                  res.write(JSON.stringify(user));
                   res.end();
                   return;
               }else{
@@ -63,78 +63,95 @@ const server = createServer( async (req, res) => {
               }
           }
 
-          if(req.url !== "/api/posts"){
+          if(req.url !== "/api/users"){
             NotFoundHandler(req, res);
             return;
           }
           
-          const [posts] = await pool.query("SELECT * FROM posts").catch(error => {
-            console.error("Error fetching posts:", error);
-            res.statusCode = 500;
-          })
-          res.write(JSON.stringify(posts));
-          res.end()
+          const [users] = await pool.query("SELECT * FROM users")
+            .catch(error => {
+              console.error("Error fetching users:", error);
+              res.statusCode = 500;
+            });
+
+          res.write(JSON.stringify(users));
+          res.end();
 
           break;
 
         case "POST":
 
-          if(req.url == "/api/posts"){
+          if(req.url = '/api/users'){
             let data = '';
-  
-            req.on('data', (chunk) => {
-              data += chunk;
+
+            req.on("data", chunk => {
+              data += chunk.toString();
             });
-  
-            req.on('end', () => {
-              posts.push(JSON.parse(data));
-              res.statusCode = 201;
-              toJSON(res, {"Message" : "Ressource added successfully"});
-              res.end();
+
+            req.on("end", async () => {
+              if(data){
+                try{
+                  const user = JSON.parse(data);
+                  await pool.query("INSERT INTO users (id, first_name, last_name, email, zip) VALUES (?, ?, ?, ?, ?)",
+                    [user.id ,user.first_name, user.last_name, user.email, user.zip]
+                  );
+
+                  const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [user.id]);
+                  res.statusCode = 201;
+                  res.end(JSON.stringify(rows));
+                }catch(err){
+                  res.statusCode = 409;
+                  res.end(JSON.stringify({"message" : err.message.toString()}))
+                }
+              }
             })
           }
+          
 
           break;
         
-        // case "PUT":
+        case "PUT":
           
-        //   if(req.url.match(/\/api\/posts\/([0-9]+)/)){
-        //     let id = req.url.split("/")[3];
+          if(req.url.match(/\/api\/users\/([0-9]+)/)){
+            let id = parseInt(req.url.split("/")[3]);
             
-        //     if(id){
-        //       let data = '';
-        //       req.on('data', chunk => {
-        //       data += chunk;
-        //       });
+            if(id){
+              try{
+                let data = '';
+                req.on('data', chunk => {
+                  data += chunk;
+                });
+  
+                const user = JSON.parse(data);
+                req.on('end', () => {
+                 pool.query("UPDATE users SET author_id= ?, text = ?, added_at = ?, likes = ?, dislikes = ?, category = ? WHERE id = ?", 
+                    [user.first_name, user.last_name, user.email, user.zip, id]
+                  )});
+                  res.statusCode = 201;
+                  res.end(); 
+                
+              }catch(err){
 
-        //       req.on('end', () => {
-        //         posts[id - 1] = JSON.parse(data);
-        //         res.statusCode = 201;
-        //         res.writeHead();
-        //         res.end(); 
-        //       });
+                NotFoundHandler(req, res);
+                res.end();
+              }
               
-        //     }else{
-        //       NotFoundHandler(req, res);
-        //       res.end();
-        //     }
-        //   }
+            }
+          }
 
-        //   break;
+          break;
 
-        // case "DELETE":
+        case "DELETE":
 
-        //   if(req.url.match(/\/api\/posts\/([0-9]+)/)){
-        //     let id = parseInt(req.url.split("/")[3]);
+          if(req.url.match(/\/api\/users\/([0-9]+)/)){
+            const id = parseInt(req.url.split("/")[3]);
 
-        //     if(id){
-        //       posts = posts.filter(post => post.id !== id);
-        //       res.statusCode = 200;
-        //       res.end();
-        //     }
-        //   }
+            if(id){
+              await pool.query("DELETE FROM users WHERE id = ?", [id]);
+            }
+          }
 
-        //   break;
+          break;
     }
     // if(req.url === "/"){
     //     res.writeHead(200, {"content-type" : "application/json"});
@@ -142,5 +159,5 @@ const server = createServer( async (req, res) => {
 })
 
 server.listen(PORT, HOST, () => {
-    console.log(`http://${HOST}:${PORT}/api/posts`);
+    console.log(`http://${HOST}:${PORT}/api/users`);
 })
