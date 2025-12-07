@@ -1,6 +1,7 @@
 import { createServer } from "node:http"
 import { loadEnvFile } from "node:process"
 import mysql from "mysql2/promise";
+import { error } from "node:console";
 loadEnvFile();
 
 
@@ -13,43 +14,9 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-const con = pool.getConnection();
+const con = await pool.getConnection();
 
-con ? console.log("yes") : console.log("no");
-
-// con.query("Insert into posts VALUES")
-
-let posts = [
-  {
-    id: 1,
-    title: "The Rise of Modern JavaScript Frameworks",
-    content:
-      "JavaScript has evolved from a simple scripting language into the backbone of modern web development. Frameworks like React, Vue, and Svelte have transformed how developers architect interfaces, manage state, and scale massive applications. Learning a framework is now essential for building dynamic and maintainable user experiences.",
-    author: "Skull Vlass",
-    tags: ["JavaScript", "Web Development", "Frontend"],
-    created_at: "2025-12-01T21:00:00Z"
-  },
-
-  {
-    id: 2,
-    title: "Why API Design Matters More Than Ever",
-    content:
-      "APIs form the foundation of communication between distributed systems. With microservices and mobile-first architectures, a poorly designed API can compromise performance and reliability. Good API design emphasizes clarity, consistency, and long-term maintainability.",
-    author: "John Doe",
-    tags: ["API", "Backend", "Architecture"],
-    created_at: "2025-12-01T21:05:00Z"
-  },
-
-  {
-    id: 3,
-    title: "Mastering CSS Layouts in 2025",
-    content:
-      "CSS now offers powerful layout tools such as Grid, Flexbox, container queries, and :has(). Mastering these techniques enables developers to build responsive, efficient, and scalable designs without relying heavily on external frameworks.",
-    author: "Dev Writer",
-    tags: ["CSS", "Design", "Frontend"],
-    created_at: "2025-12-01T21:10:00Z"
-  }
-];
+con.release();
 
 const NotFoundHandler = (req, res) => {
   res.statusCode = 404;
@@ -71,24 +38,22 @@ const HOST = process.env.HOST || "localhost";
 const PORT = process.env.PORT || 3000;
 
 // create a server
-const server = createServer((req, res) => {
-  
-  const message = {};
-  
+const server = createServer( async (req, res) => {
+    
     switch (req.method){
       
-
         case "GET":
           
           res.setHeader("Content-type", "application/json");
+
           if(req.url.match(/\/api\/posts\/([0-9]+)/)){
 
               const postId = req.url.split('/').pop();
-              const user = posts.find(post => post.id == Number(postId));
+              const [post] = await pool.query("SELECT * FROM posts WHERE id = ?", [postId]);
 
-              if(user){
+              if(post){
                   res.statusCode = 200;
-                  res.write(JSON.stringify(user));
+                  res.write(JSON.stringify(post));
                   res.end();
                   return;
               }else{
@@ -103,6 +68,10 @@ const server = createServer((req, res) => {
             return;
           }
           
+          const [posts] = await pool.query("SELECT * FROM posts").catch(error => {
+            console.error("Error fetching posts:", error);
+            res.statusCode = 500;
+          })
           res.write(JSON.stringify(posts));
           res.end()
 
@@ -127,45 +96,45 @@ const server = createServer((req, res) => {
 
           break;
         
-        case "PUT":
+        // case "PUT":
           
-          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
-            let id = req.url.split("/")[3];
+        //   if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+        //     let id = req.url.split("/")[3];
             
-            if(id){
-              let data = '';
-              req.on('data', chunk => {
-              data += chunk;
-              });
+        //     if(id){
+        //       let data = '';
+        //       req.on('data', chunk => {
+        //       data += chunk;
+        //       });
 
-              req.on('end', () => {
-                posts[id - 1] = JSON.parse(data);
-                res.statusCode = 201;
-                res.writeHead();
-                res.end(); 
-              });
+        //       req.on('end', () => {
+        //         posts[id - 1] = JSON.parse(data);
+        //         res.statusCode = 201;
+        //         res.writeHead();
+        //         res.end(); 
+        //       });
               
-            }else{
-              NotFoundHandler(req, res);
-              res.end();
-            }
-          }
+        //     }else{
+        //       NotFoundHandler(req, res);
+        //       res.end();
+        //     }
+        //   }
 
-          break;
+        //   break;
 
-        case "DELETE":
+        // case "DELETE":
 
-          if(req.url.match(/\/api\/posts\/([0-9]+)/)){
-            let id = parseInt(req.url.split("/")[3]);
+        //   if(req.url.match(/\/api\/posts\/([0-9]+)/)){
+        //     let id = parseInt(req.url.split("/")[3]);
 
-            if(id){
-              posts = posts.filter(post => post.id !== id);
-              res.statusCode = 200;
-              res.end();
-            }
-          }
+        //     if(id){
+        //       posts = posts.filter(post => post.id !== id);
+        //       res.statusCode = 200;
+        //       res.end();
+        //     }
+        //   }
 
-          break;
+        //   break;
     }
     // if(req.url === "/"){
     //     res.writeHead(200, {"content-type" : "application/json"});
