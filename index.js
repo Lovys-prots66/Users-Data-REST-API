@@ -18,20 +18,39 @@ const con = await pool.getConnection();
 
 con.release();
 
-const NotFoundHandler = (req, res) => {
-  res.statusCode = 404;
-  res.setHeader("Content-type", "application/json");
-  res.write(JSON.stringify({"Message" : "Ressource not found"}));
+const parseBody = (req) => {
+
+  return new Promise((resolve, reject) => {
+    let body = '';
+  
+    req.on("data", chunk => body += chunk.toString());
+  
+    req.on("end", () => { 
+      try {
+        resolve(body ? JSON.parse(body) : '');
+      } catch (error) {
+        reject('invalid JSON');
+      }
+    });
+    req.on("error", reject);
+  })
+
+}
+
+const sendError = (res, statusCode, message) => {
+  res.writeHead(statusCode, {'Message' : message.toString()});
   res.end();
 }
 
-const SuccessHandler = () => {
-
+const toJSON = (item) => {
+  return JSON.stringify(item);
 }
 
-const toJSON = (res, item) => {
-  res.write(JSON.stringify(item));
+const sendResult = (res, statusCode, data) => {
+  res.writeHead(statusCode, {'Content-Type' : 'application/json'});
+  res.end(toJSON(data));
 }
+
 
 //import environment variables from .env
 const HOST = process.env.HOST || "localhost";
@@ -44,23 +63,23 @@ const server = createServer( async (req, res) => {
       
         case "GET":
           
-          res.setHeader("Content-type", "application/json");
-
           if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
-              const userId = req.url.split('/').pop();
-              const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+            const userId = req.url.split('/').pop();
+            const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
 
-              if(user){
-                  res.statusCode = 200;
-                  res.write(JSON.stringify(user));
-                  res.end();
-                  return;
-              }else{
-                NotFoundHandler(req, res);
-                res.end();
-                return;
+            try {
+              
+              if(!user){
+                sendError(res, 404, 'Ressource not found');
               }
+
+              sendResult(res, 200, user);
+
+            } catch (error) {
+              sendError(res, 500, error.message.toString());
+              process.exit(1);
+            }
           }
 
           if(req.url !== "/api/users"){
@@ -68,43 +87,46 @@ const server = createServer( async (req, res) => {
             return;
           }
           
-          const [users] = await pool.query("SELECT * FROM users")
-            .catch(error => {
-              console.error("Error fetching users:", error);
-              res.statusCode = 500;
-            });
+          try {
+            const [users] = await pool.query("SELECT * FROM users");
+            
+            if(!users){
+              sendError(res, 404, 'Ressources not found');
+            }
+            
+            sendResult(res, 200, users);
 
-          res.write(JSON.stringify(users));
-          res.end();
+          } catch (error) {
+            sendError(res, 500, error.message.toString());
+            process.exit(1);
+          }
 
           break;
 
         case "POST":
 
           if(req.url = '/api/users'){
-            let data = '';
+            
+            let data = await parseBody(req);
 
-            req.on("data", chunk => {
-              data += chunk.toString();
-            });
+            if(data){
+              try{
 
-            req.on("end", async () => {
-              if(data){
-                try{
-                  const user = JSON.parse(data);
-                  await pool.query("INSERT INTO users (id, first_name, last_name, email, zip) VALUES (?, ?, ?, ?, ?)",
-                    [user.id ,user.first_name, user.last_name, user.email, user.zip]
-                  );
-
-                  const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [user.id]);
-                  res.statusCode = 201;
-                  res.end(JSON.stringify(rows));
-                }catch(err){
-                  res.statusCode = 409;
-                  res.end(JSON.stringify({"message" : err.message.toString()}))
+                if(!data.first_name || !data.last_name || !data.email || !data.zip){
+                  sendError(res, 400, 'All fields required');
                 }
+                
+                const [result] = await pool.query("INSERT INTO users (id, first_name, last_name, email, zip) VALUES (?, ?, ?, ?, ?)",
+                  [data.id, data.first_name, data.last_name, data.email, data.zip]
+                );
+
+                sendResult(res, 201, result);
+
+              }catch(err){
+                sendError(res, 500, 'Duplicate entity');
+                process.exit(1);
               }
-            })
+            }
           }
           
 
@@ -146,8 +168,13 @@ const server = createServer( async (req, res) => {
           if(req.url.match(/\/api\/users\/([0-9]+)/)){
             const id = parseInt(req.url.split("/")[3]);
 
-            if(id){
-              await pool.query("DELETE FROM users WHERE id = ?", [id]);
+            try {
+              if(id){
+                const [result] = await pool.query("DELETE FROM users WHERE id = ?", [id]);
+              }
+              
+            } catch (error) {
+              
             }
           }
 
