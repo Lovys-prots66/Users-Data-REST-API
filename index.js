@@ -4,19 +4,33 @@ import mysql from "mysql2/promise";
 
 loadEnvFile();
 
+async function connection(){
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10
-});
+  try {
+    const pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      waitForConnections: true,
+      connectionLimit: 10
+    });
+  
+    const connexion = await pool.getConnection();
+    
+    return connexion;
+    
+  } catch (error) {
+    console.error('Error connecting to the database:', error.message);
+    process.exit(1);    
+  }
 
-const con = await pool.getConnection();
+  
+}
 
+const con = await connection();
 con.release();
+
 
 const parseBody = (req) => {
 
@@ -66,7 +80,7 @@ const server = createServer( async (req, res) => {
           if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
             const userId = req.url.split('/').pop();
-            const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [userId]);
+            const [user] = await con.query("SELECT * FROM users WHERE id = ?", [userId]);
 
             try {
               
@@ -83,12 +97,11 @@ const server = createServer( async (req, res) => {
           }
 
           if(req.url !== "/api/users"){
-            NotFoundHandler(req, res);
             return;
           }
           
           try {
-            const [users] = await pool.query("SELECT * FROM users");
+            const [users] = await con.query("SELECT * FROM users");
             
             if(!users){
               sendError(res, 404, 'Ressources not found');
@@ -123,7 +136,7 @@ const server = createServer( async (req, res) => {
                 sendResult(res, 201, result);
 
               }catch(err){
-                sendError(res, 500, 'Duplicate entity');
+                sendError(res, 500, err.message.toString());
                 process.exit(1);
               }
             }
@@ -153,9 +166,8 @@ const server = createServer( async (req, res) => {
                   res.end(); 
                 
               }catch(err){
-
-                NotFoundHandler(req, res);
-                res.end();
+                sendError(res, 500, err.message.toString());
+                process.exit(1);
               }
               
             }
@@ -174,7 +186,8 @@ const server = createServer( async (req, res) => {
               }
               
             } catch (error) {
-              
+              sendError(res, 500, error.message.toString());
+              process.exit(1);              
             }
           }
 
