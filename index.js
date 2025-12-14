@@ -2,6 +2,10 @@ import { createServer } from "node:http"
 import { loadEnvFile } from "node:process"
 import mysql from "mysql2/promise";
 
+import { sendError } from "./utils/sendError.js";
+import { sendResult } from "./utils/sendResult.js";
+import { parseBody } from "./utils/parseBody.js";
+
 loadEnvFile();
 
 async function connection(){
@@ -32,38 +36,6 @@ const con = await connection();
 con.release();
 
 
-const parseBody = (req) => {
-
-  return new Promise((resolve, reject) => {
-    let body = '';
-  
-    req.on("data", chunk => body += chunk.toString());
-  
-    req.on("end", () => { 
-      try {
-        resolve(body ? JSON.parse(body) : '');
-      } catch (error) {
-        reject('invalid JSON');
-      }
-    });
-    req.on("error", reject);
-  })
-
-}
-
-const sendError = (res, statusCode, message) => {
-  res.writeHead(statusCode, {'Message' : message.toString()});
-  res.end();
-}
-
-const toJSON = (item) => {
-  return JSON.stringify(item);
-}
-
-const sendResult = (res, statusCode, data, cache = 'no-cache') => {
-  res.writeHead(statusCode, {'Content-Type' : 'application/json', 'Cache-Control' : cache});
-  res.end(toJSON(data));
-}
 
 
 //import environment variables from .env
