@@ -9,6 +9,8 @@ export const responses = {
         SERVER_ERROR : 500
     },
 
+    cache_age : "max-age=3600",
+
     errors : {
         NOT_FOUND : "Ressource not found",
         DUPLICATE : "User already exists",

@@ -5,15 +5,13 @@ import { sendResult } from "../utils/sendResult.js"
 
 class userReadController {
 
-    cache = "max-age=3600";
-
     static async getAllUsers(res){
 
-        const { http } = responses;
+        const { http, cache_age } = responses;
         
         try{
             const [users] = await getUser.allUsers();
-            sendResult(res, http.SUCCESS, users, cache);
+            sendResult(res, http.SUCCESS, users, cache_age);
         }catch(err){
             sendError(res, http.SERVER_ERROR, err.message);
         }
@@ -24,12 +22,12 @@ class userReadController {
         const { http, errors } = responses;
 
         try {
-            const [user] = getUser.getSingle(req.params.id);
+            const [user] = await getUser.getSingle(req.params.id);
             if(!user){
                 sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
             }
 
-            sendResult(res, http.SUCCESS, user[0], cache);
+            sendResult(res, http.SUCCESS, user[0], cache_age);
         } catch (error) {
             sendError(res, http.SERVER_ERROR, err.message);
         }

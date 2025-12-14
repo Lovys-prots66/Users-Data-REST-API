@@ -3,14 +3,16 @@ import { sendError } from "../utils/sendError.js";
 import { responses } from "../config/responses.js";
 import insert from "../models/post.js";
 import { sendResult } from "../utils/sendResult.js";
+import update from "../models/put.js";
 
-class userAddController{
+class userUpdateController{
+
     static validate(data){
         return new Promise((resolve, reject) => {
             
-            const {id, first_name, last_name, email, zip} = data;
+            const {first_name, last_name, email, zip} = data;
 
-            if(!id || !first_name || !last_name || !email || !zip){
+            if( !first_name || !last_name || !email || !zip){
                 reject("All fields are required");
             }
 
@@ -21,9 +23,11 @@ class userAddController{
         });
     }
 
-    static async addUser(req,res){
-        const { http, errors } = responses;
+    static async updateUser(req,res){
+        const { http } = responses;
         try {
+            const id = req.params.id;
+
             const data = await parseBody(req);
 
             const validationError = await this.validate(data);
@@ -32,18 +36,14 @@ class userAddController{
                 sendError(res, http.BAD_REQUEST, validationError);
             }
 
-            const [newUser] = await insert.addUser(data);
+            const [updated] = await update.updateUser(data, id);
 
-            sendResult(res, http.CREATED, newUser);
+            sendResult(res, http.CREATED, updated[0]);
 
         } catch (error) {
-            if(error.message = "ERR_DUP_ENTITY"){
-                sendError(res, http.CONFLICT, errors.DUPLICATE);
-            }
-
             sendError(res, http.SERVER_ERROR, error.message);
         }
     }
 }
 
-export default userAddController;
+export default userUpdateController;
