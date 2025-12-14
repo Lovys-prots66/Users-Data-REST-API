@@ -22,7 +22,7 @@ async function connection(){
     
   } catch (error) {
     console.error('Error connecting to the database:', error.message);
-    process.exit(1);    
+    process.exit(1);
   }
 
   
@@ -60,8 +60,8 @@ const toJSON = (item) => {
   return JSON.stringify(item);
 }
 
-const sendResult = (res, statusCode, data) => {
-  res.writeHead(statusCode, {'Content-Type' : 'application/json'});
+const sendResult = (res, statusCode, data, cache = 'no-cache') => {
+  res.writeHead(statusCode, {'Content-Type' : 'application/json', 'Cache-Control' : cache});
   res.end(toJSON(data));
 }
 
@@ -88,7 +88,7 @@ const server = createServer( async (req, res) => {
                 sendError(res, 404, 'Ressource not found');
               }
 
-              sendResult(res, 200, user);
+              sendResult(res, 200, user, 'max-age=3600');
 
             } catch (error) {
               sendError(res, 500, error.message.toString());
@@ -107,7 +107,7 @@ const server = createServer( async (req, res) => {
               sendError(res, 404, 'Ressources not found');
             }
             
-            sendResult(res, 200, users);
+            sendResult(res, 200, users, 'max-age=3600');
 
           } catch (error) {
             sendError(res, 500, error.message.toString());
