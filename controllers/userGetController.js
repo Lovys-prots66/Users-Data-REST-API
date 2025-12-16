@@ -19,12 +19,12 @@ class userReadController {
     
     static async getSpecific(id, res) {
         
-        const { http, errors } = responses;
+        const { http, errors, cache_age } = responses;
 
         try {
             const user = await getUser.getSingle(id);
             if(!user){
-                sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
+                return sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
             }
 
             sendResult(res, http.SUCCESS, user, cache_age);

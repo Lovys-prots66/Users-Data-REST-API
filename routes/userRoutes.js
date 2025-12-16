@@ -11,12 +11,9 @@ async function userRouter(req, res){
       
       if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
-        const userId = req.url.split('/').pop();
+        const userId = parseInt(req.url.split('/').pop());
        
-        if(req.url = '/api/users'){
-          return await userReadController.getSpecific(userId, res);                
-        }
-      
+        return await userReadController.getSpecific(userId, res);      
       }
         
 

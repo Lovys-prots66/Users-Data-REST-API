@@ -20,7 +20,7 @@ class getUser{
 
         const [row] = await con.query("SELECT * FROM users WHERE id = ?", [id]);
 
-        return row;
+        return row[0] || null;
         
     }
 }
