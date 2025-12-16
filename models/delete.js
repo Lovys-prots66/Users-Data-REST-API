@@ -7,7 +7,7 @@ class remove{
 
         const query = "DELETE FROM users WHERE id = ?";
 
-        const [row] = con.query(query, [id]);
+        const [row] = await con.query(query, [id]);
 
         return row;
     }

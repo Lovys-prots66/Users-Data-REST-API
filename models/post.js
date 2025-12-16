@@ -3,15 +3,15 @@ import getDBConnection from "../config/connection.js";
 class insert{
     static async addUser(user){
 
-        const { id, firstname, lastname, email, zip } = user;
+        const { id, first_name, last_name, email, zip } = user;
 
         const con = await getDBConnection();
 
-        const query = "INSERT INTO users(id, firstname, lastname, email, zip) VALUES (?, ?, ?, ?, ?)";
+        const query = "INSERT INTO users(id, first_name, last_name, email, zip) VALUES (?, ?, ?, ?, ?)";
 
-        const [row] = con.query(query, [id, firstname, lastname, email, zip]);
+        const [row] = await con.query(query, [id, first_name, last_name, email, zip]);
 
-        return row;
+        return row[0];
     }
 }
 

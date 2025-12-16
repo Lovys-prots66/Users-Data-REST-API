@@ -1,7 +1,6 @@
 import getUser from "../models/get.js"
 import { responses } from "../config/responses.js";
-import { sendError } from "../utils/sendError.js";
-import { sendResult } from "../utils/sendResult.js"
+import { sendResult, sendError } from "../utils/senders.js";
 
 class userReadController {
 

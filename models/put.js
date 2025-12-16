@@ -8,7 +8,7 @@ class update{
 
         const query = "UPDATE users SET firstname = ?, lastname = ?, email = ?, zip = ? WHERE id = ?";
 
-        const [row] = con.query(query, [firstname, lastname, email, zip, id]);
+        const [row] = await con.query(query, [firstname, lastname, email, zip, id]);
 
         return row;
     }

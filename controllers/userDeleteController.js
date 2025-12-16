@@ -1,7 +1,6 @@
 import { responses } from "../config/responses.js";
 import remove from "../models/delete.js";
-import { sendResult } from "../utils/sendResult.js"
-import { sendError } from "../utils/sendError.js"
+import { sendResult, sendError } from "../utils/senders.js";
 
 class userDeleteController {
     static async delete(req, res){

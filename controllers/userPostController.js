@@ -1,8 +1,7 @@
 import { parseBody } from "../utils/parseBody.js";
-import { sendError } from "../utils/sendError.js";
 import { responses } from "../config/responses.js";
 import insert from "../models/post.js";
-import { sendResult } from "../utils/sendResult.js";
+import { sendResult, sendError } from "../utils/senders.js";
 
 class userAddController{
     static validate(data){
@@ -17,6 +16,7 @@ class userAddController{
             if(!data.email.includes("@")){
                 reject("Invalid Email");
             }
+            resolve(null);
 
         });
     }
@@ -29,19 +29,19 @@ class userAddController{
             const validationError = await this.validate(data);
 
             if(validationError){
-                sendError(res, http.BAD_REQUEST, validationError);
+                return sendError(res, http.BAD_REQUEST, validationError);
             }
 
-            const [newUser] = await insert.addUser(data);
+            const newUser = await insert.addUser(data);
 
             sendResult(res, http.CREATED, newUser);
 
         } catch (error) {
-            if(error.message = "ERR_DUP_ENTITY"){
-                sendError(res, http.CONFLICT, errors.DUPLICATE);
+            if(error.message === "ERR_DUP_ENTITY"){
+                return sendError(res, http.CONFLICT, errors.DUPLICATE);
             }
 
-            sendError(res, http.SERVER_ERROR, error.message);
+            return sendError(res, http.SERVER_ERROR, error.message);
         }
     }
 }

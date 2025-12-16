@@ -21,8 +21,8 @@ async function userRouter(req, res){
 
     case "POST":
 
-      if(req.url = '/api/users'){            
-        return await userPostController.addUser(req, res)
+      if(req.url === '/api/users'){            
+        return await userPostController.addUser(req, res);
       }
       
 
@@ -31,10 +31,11 @@ async function userRouter(req, res){
     case "PUT":
       
       if(req.url.match(/\/api\/users\/([0-9]+)/)){
-        // let id = parseInt(req.url.split("/")[3]);
+        let id = parseInt(req.url.split("/")[3]);
         
-        return await userUpdateController.updateUser(req, res);
+        return await userUpdateController.updateUser(id, req, res);
       }
+
       break;
 
     case "DELETE":
