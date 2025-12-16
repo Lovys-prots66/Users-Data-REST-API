@@ -17,12 +17,12 @@ class userReadController {
         }
     }
     
-    static async getSpecific(req, res) {
+    static async getSpecific(id, res) {
         
         const { http, errors } = responses;
 
         try {
-            const [user] = await getUser.getSingle(req.params.id);
+            const [user] = await getUser.getSingle(id);
             if(!user){
                 sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
             }
@@ -34,4 +34,4 @@ class userReadController {
     }
 }
 
-export default userGetController;
+export default userReadController;

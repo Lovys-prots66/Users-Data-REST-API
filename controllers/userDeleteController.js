@@ -23,3 +23,5 @@ class userDeleteController {
         }
     }
 }
+
+export default userDeleteController;
