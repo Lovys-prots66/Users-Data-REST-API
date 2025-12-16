@@ -7,7 +7,7 @@ class getUser{
     
         const table = "users";
 
-        const [rows] = con.query("SELECT * FROM " + table); 
+        const [rows] = await con.query("SELECT * FROM " + table);
 
         return rows;
 
@@ -18,9 +18,9 @@ class getUser{
 
         const con = await getDBConnection();
 
-        const [row] = con.query("SELECT * FROM users WHERE id = ?", [id]);
+        const [row] = await con.query("SELECT * FROM users WHERE id = ?", [id]);
 
-        return row[0];
+        return row;
         
     }
 }

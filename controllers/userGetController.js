@@ -10,7 +10,7 @@ class userReadController {
         const { http, cache_age } = responses;
         
         try{
-            const [users] = await getUser.allUsers();
+            const users = await getUser.allUsers();
             sendResult(res, http.SUCCESS, users, cache_age);
         }catch(err){
             sendError(res, http.SERVER_ERROR, err.message);
@@ -22,14 +22,14 @@ class userReadController {
         const { http, errors } = responses;
 
         try {
-            const [user] = await getUser.getSingle(id);
+            const user = await getUser.getSingle(id);
             if(!user){
                 sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
             }
 
-            sendResult(res, http.SUCCESS, user[0], cache_age);
+            sendResult(res, http.SUCCESS, user, cache_age);
         } catch (error) {
-            sendError(res, http.SERVER_ERROR, err.message);
+            sendError(res, http.SERVER_ERROR, error.message);
         }
     }
 }

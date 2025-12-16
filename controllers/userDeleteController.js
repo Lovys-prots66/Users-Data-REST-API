@@ -1,4 +1,4 @@
-import { responses } from "../config/responses";
+import { responses } from "../config/responses.js";
 import remove from "../models/delete.js";
 import { sendResult } from "../utils/sendResult.js"
 import { sendError } from "../utils/sendError.js"

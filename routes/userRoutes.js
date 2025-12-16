@@ -3,7 +3,7 @@ import userPostController from "../controllers/userPostController.js";
 import userUpdateController from "../controllers/userUpdateController.js";
 import userDeleteController from "../controllers/userDeleteController.js";
 
-async function router(req, res){
+async function userRouter(req, res){
 
   switch (req.method){
     
@@ -12,17 +12,15 @@ async function router(req, res){
       if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
         const userId = req.url.split('/').pop();
-          
-        return await userReadController.getSpecific(userId, res);                
+       
+        if(req.url = '/api/users'){
+          return await userReadController.getSpecific(userId, res);                
+        }
       
       }
         
 
-      if(req.url == "/api/users"){
-        return await userReadController.getAllUsers(res);
-      }
-
-      break;
+      return await userReadController.getAllUsers(res);
 
     case "POST":
 
@@ -53,4 +51,4 @@ async function router(req, res){
     
 }
 
-export default router;
+export default userRouter;
