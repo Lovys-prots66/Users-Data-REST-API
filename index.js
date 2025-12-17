@@ -1,5 +1,5 @@
 import { createServer } from "node:http"
-import userRouter from "./routes/userRoutes.js";
+import userRouter from "./src/routes/userRoutes.js";
 import { loadEnvFile } from "node:process";
 
 loadEnvFile()
@@ -12,10 +12,8 @@ const PORT = process.env.PORT || 3000;
 const server = createServer( async (req, res) => {
   
   res.end(await userRouter(req, res));
-    // if(req.url === "/"){
-    //     res.writeHead(200, {"content-type" : "application/json"});
-    // }
-})
+
+});
 
 server.listen(PORT, HOST, () => {
     console.log(`http://${HOST}:${PORT}/api/users`);
