@@ -23,7 +23,7 @@ class userUpdateController{
     }
 
     static async updateUser(id, req, res){
-        const { http } = responses;
+        const { http, errors } = responses;
         try {
             const data = await parseBody(req);
 
@@ -38,7 +38,7 @@ class userUpdateController{
             return sendResult(res, http.CREATED, updated);
 
         } catch (error) {
-            return sendError(res, http.SERVER_ERROR, error.message);
+            return sendError(res, http.SERVER_ERROR, errors.INTERNAL);
         }
     }
 }

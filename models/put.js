@@ -6,11 +6,11 @@ class update{
 
         const con = await getDBConnection();
 
-        const query = "UPDATE users SET firstname = ?, lastname = ?, email = ?, zip = ? WHERE id = ?";
+        const query = "UPDATE users SET first_name = ?, last_name = ?, email = ?, zip = ? WHERE id = ?";
 
         const [row] = await con.query(query, [firstname, lastname, email, zip, id]);
 
-        return row;
+        return row[0];
     }
 }
 

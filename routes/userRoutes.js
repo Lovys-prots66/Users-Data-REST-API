@@ -12,7 +12,7 @@ async function userRouter(req, res){
       if(req.url.match(/\/api\/users\/([0-9]+)/)){
 
         const userId = parseInt(req.url.split('/').pop());
-       
+        
         return await userReadController.getSpecific(userId, res);      
       }
         
@@ -27,21 +27,22 @@ async function userRouter(req, res){
       
 
       break;
-    
-    case "PUT":
       
-      if(req.url.match(/\/api\/users\/([0-9]+)/)){
-        let id = parseInt(req.url.split("/")[3]);
+      case "PUT":
+        
+        if(req.url.match(/\/api\/users\/([0-9]+)/)){
+        const id = parseInt(req.url.split("/")[3]);
         
         return await userUpdateController.updateUser(id, req, res);
       }
 
       break;
 
-    case "DELETE":
-
-      if(req.url.match(/\/api\/users\/([0-9]+)/)){
-        return await userDeleteController.delete(req, res);
+      case "DELETE":
+        
+        if(req.url.match(/\/api\/users\/([0-9]+)/)){
+        const userId = parseInt(req.url.split('/').pop());
+        return await userDeleteController.delete(userId, res);
       }
 
       break;
