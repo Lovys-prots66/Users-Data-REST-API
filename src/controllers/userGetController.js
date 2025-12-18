@@ -1,0 +1,36 @@
+import getUser from "../models/get.js"
+import { responses } from "../config/responses.js";
+import { sendResult, sendError } from "../utils/senders.js";
+
+class userReadController {
+
+    static async getAllUsers(res){
+
+        const { http, cache_age } = responses;
+        
+        try{
+            const users = await getUser.allUsers();
+            sendResult(res, http.SUCCESS, users, cache_age);
+        }catch(err){
+            sendError(res, http.SERVER_ERROR, err.message);
+        }
+    }
+    
+    static async getSpecific(id, res) {
+        
+        const { http, errors, cache_age } = responses;
+
+        try {
+            const user = await getUser.getSingle(id);
+            if(!user){
+                return sendError(res, http.NOT_FOUND, errors.NOT_FOUND);
+            }
+
+            sendResult(res, http.SUCCESS, user, cache_age);
+        } catch (error) {
+            sendError(res, http.SERVER_ERROR, error.message);
+        }
+    }
+}
+
+export default userReadController;
