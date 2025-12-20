@@ -1,8 +1,9 @@
 import { createServer } from "node:http"
 import userRouter from "./src/routes/userRoutes.js";
 import { loadEnvFile } from "node:process";
+import { configDotenv } from "dotenv";
 
-loadEnvFile()
+configDotenv();
 
 //import environment variables from .env
 const HOST = process.env.HOST || "localhost";
