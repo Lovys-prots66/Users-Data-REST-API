@@ -5,30 +5,28 @@ import userDeleteController from "../controllers/userDeleteController.js";
 
 import configuration from "../config/config.js"
 
-async function userRouterV2(req, res){
+async function userRouterV2(req, res, url){
     const { endpoints } = configuration;
     const { v2 } = endpoints;
 
-    const url = new URL(req.url, `http://${req.headers.host}`);
+    const pathname = url.pathname;
+    const userId = url.searchParams.get("userId");
 
     switch (req.method){
         case "GET":
             
-            if(url.pathname === v2 && url.searchParams.get("userId")){
-
-                const userId = parseInt(url.searchParams.get("userId"));
-                
+            if(pathname === v2 && userId){                
                 return await userReadController.getSpecific(userId, res);      
             }
                 
-            if(url.searchParams.get("userId") === null && url.pathname === v2){
+            if(userId === null && pathname === v2){
                 return await userReadController.getAllUsers(res);
             }
 
             break;
         case "POST":
 
-            if(url.pathname == v2){            
+            if(pathname == v2){            
                 return await userPostController.addUser(req, res);
             }
             
@@ -37,18 +35,15 @@ async function userRouterV2(req, res){
         
         case "PUT":
             
-            if(url.searchParams.get("userId")){
-                const id = parseInt(url.searchParams.get("userId"));
-                
-                return await userUpdateController.updateUser(id, req, res);
+            if(pathname === v2 && userId){                
+                return await userUpdateController.updateUser(userId, req, res);
             }
 
             break;
 
         case "DELETE":
             
-            if(url.searchParams.get("userId")){
-                const userId = parseInt(url.searchParams.get("userId"));
+            if(pathname === v2 && userId){
                 return await userDeleteController.delete(userId, res);
             }
 
