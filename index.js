@@ -18,14 +18,19 @@ const {v1, v2} = endpoints
 // create a server
 const server = createServer( async (req, res) => {
 
-  if(req.url.match(v1)){
-    return await userRouterV1(req, res);
+  const url = new URL(req.url, `http://${req.headers.host}`);
+
+  const { endpoints } = configuration;
+  const { v1_1, v1_2 } = endpoints;
+
+  if(url.pathname.match(v1_1) || url.pathname.match(v1_2)){
+    return await userRouterV1(req, res, url);
+  }
+
+  if(url.pathname === v2){
+    return await userRouterV2(req, res);
   }
   
-  if(req.url.has(v2)){
-
-  return await userRouterV2(req, res);
-  }
 });
 
 server.listen(PORT, HOST, () => {

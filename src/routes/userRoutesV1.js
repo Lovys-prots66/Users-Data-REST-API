@@ -5,29 +5,31 @@ import userDeleteController from "../controllers/userDeleteController.js";
 
 import configuration from "../config/config.js"
 
-async function userRouterV1(req, res){
+async function userRouterV1(req, res, url){
 
   const { endpoints } = configuration;
   const { v1_1, v1_2 } = endpoints;
+
+  const pathname = url.pathname;
 
   switch (req.method){
     
     case "GET":
       
-      if(req.url.match(v1_1)){
+      if(pathname.match(v1_1)){
 
-        const userId = parseInt(req.url.split('/').pop());
+        const userId = parseInt(pathname.split('/').pop());
         
         return await userReadController.getSpecific(userId, res);      
       }
         
-      if(req.url.match(v1_2)){
+      if(pathname.match(v1_2)){
         return await userReadController.getAllUsers(res);
       }
 
     case "POST":
 
-      if(req.url.match(v1_2)){            
+      if(pathname.match(v1_2)){            
         return await userPostController.addUser(req, res);
       }
       
@@ -36,8 +38,8 @@ async function userRouterV1(req, res){
       
       case "PUT":
         
-        if(req.url.match(v1_1)){
-        const id = parseInt(req.url.split("/")[4]);
+        if(pathname.match(v1_1)){
+        const id = parseInt(pathname.split("/")[4]);
         
         return await userUpdateController.updateUser(id, req, res);
       }
@@ -46,8 +48,8 @@ async function userRouterV1(req, res){
 
       case "DELETE":
         
-        if(req.url.match(v1_1)){
-        const userId = parseInt(req.url.split('/').pop());
+        if(pathname.match(v1_1)){
+        const userId = parseInt(pathname.split('/').pop());
         return await userDeleteController.delete(userId, res);
       }
 
