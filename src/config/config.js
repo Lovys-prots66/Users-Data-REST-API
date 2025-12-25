@@ -19,7 +19,7 @@ const configuration = {
     endpoints : {
         v1_1 : /^\/api\/users\/v1\/([0-9]+)$/,
         v1_2 : "/api/users/v1",
-        v2 : /^\/api\/users\/v2(\/([0-9]+))?$/
+        v2 : "/api/users/v2"
     }
 }
 
