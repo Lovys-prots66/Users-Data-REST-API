@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "debug" : "node --inspect index.js",
+    "build": "node index.js"
   },
   "keywords": [],
   "author": "",
