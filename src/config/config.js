@@ -4,10 +4,12 @@ loadEnvFile()
 
 const configuration = {
 
-    server: [
-        {HOST: process.env.HOST},
-        {PORT: process.env.PORT}
-    ],
+    http : {
+        HOST: process.env.HOST,
+        PORT: process.env.PORT,
+        maxReqs : 100,
+        windowMs : 60000
+    },
 
     database : {
         DB_NAME : process.env.DB_NAME,

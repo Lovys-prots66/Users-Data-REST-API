@@ -4,6 +4,8 @@ import userUpdateController from "../controllers/userUpdateController.js";
 import userDeleteController from "../controllers/userDeleteController.js";
 
 import configuration from "../config/config.js"
+import { sendError } from "../utils/senders.js";
+import { setHeaders } from "../utils/setHeaders.js";
 
 async function userRouterV2(req, res, url){
     const { endpoints } = configuration;
@@ -11,6 +13,8 @@ async function userRouterV2(req, res, url){
 
     const pathname = url.pathname;
     const userId = url.searchParams.get("userId");
+
+    setHeaders(res);
 
     switch (req.method){
         case "GET":
@@ -47,6 +51,19 @@ async function userRouterV2(req, res, url){
                 return await userDeleteController.delete(userId, res);
             }
 
+            break;
+        
+        case "HEAD":
+
+            if(pathname === v2){
+                res.writeHead(200);
+                return res.end();
+            }
+
+            break;
+            
+        default:
+            sendError(res, 405, "Method Not Allowed or Not Supported");
             break;
     }
 }
