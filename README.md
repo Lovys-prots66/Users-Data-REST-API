@@ -10,6 +10,7 @@ A simple Rest API of dummy users' data.
 3. Caching with HTTP
 4. MVC (no views) structure
 5. Database driver: mysql
+6. Protection against SQL injection, XSS, DoS and prototype pollution
 
 ## usage
 
