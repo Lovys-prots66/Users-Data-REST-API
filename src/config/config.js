@@ -6,7 +6,7 @@ const configuration = {
 
     http : {
         HOST: process.env.HOST,
-        PORT: process.env.PORT,
+        PORT: process.env.LOCAL_PORT,
         maxReqs : 100,
         windowMs : 60000
     },

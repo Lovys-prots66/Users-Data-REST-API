@@ -1,0 +1,65 @@
+version : '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    container_name: api_container
+
+    env_file:
+      - .env
+
+    ports:
+      - ${LOCAL_PORT}:${DOCKER_PORT}
+
+    volumes:
+      - ./:/app/src
+      - /app/src/node_modules
+    
+    depends_on:
+      database:
+        condition: service_healthy
+
+    networks:
+      - usernet
+
+  database:
+    image: mysql:8.0
+
+    container_name: mysql_container
+
+    ports:
+      - ${DOCKER_DB_PORT}:3306
+
+    env_file: .env
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 100s
+      timeout: 50s
+      retries: 15
+
+    networks:
+      - usernet
+
+
+volumes:
+  mysql_data:
+
+networks:
+  usernet:
+    driver: bridge

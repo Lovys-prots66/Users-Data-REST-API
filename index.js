@@ -44,7 +44,9 @@ const server = createServer( async (req, res) => {
 
 });
 
-server.listen(PORT, HOST, () => {
-    console.log(`http://${HOST}:${PORT}/api/users/v1`);
-    console.log(`http://${HOST}:${PORT}/api/users/v2`);
+// start the server
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`http://${HOST}:${PORT}/api/users/v1`);
+  console.log(`http://${HOST}:${PORT}/api/users/v2`);
 })
