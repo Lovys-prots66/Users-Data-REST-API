@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # command to run test
-CMD [ "npm", "run", "test" ]
+CMD [ "npm", "run", "build" ]
